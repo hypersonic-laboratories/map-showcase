@@ -1,0 +1,263 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap');
+
+
+/* styles.css */
+body {
+    font-family: 'Arial', sans-serif;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+#camera-monitor {
+    width: 70%;
+    height: 70vh;
+    position: fixed;
+    top: 15vh;
+    left: 15%;
+    overflow-y: auto;
+    background: #1a1a1a;
+    padding: 20px;
+    box-shadow: 0 8px 16px rgba(255, 255, 255, 0.15);
+}
+
+.camera-card {
+    width: calc(33.333% - 20px);
+    height: 300px;
+    margin: 10px;
+    float: left;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    background-size: cover;
+    background-position: center;
+    border: 1px solid #333;
+}
+
+.camera-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(255, 255, 255, 0.3);
+}
+
+.camera-name {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    text-align: center;
+    padding: 10px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.camera-info {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    text-align: left;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.camera-info div {
+    margin: 0 5px;
+}
+
+
+/* hotkeys */
+
+.hotkeys {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: top left;
+    transform: scale(var(--scale)) translateX(-100%);
+    margin: 32px;
+    transition: all 0.2s ease;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background-color: #161616;
+    border-radius: 12px;
+    pointer-events: none;
+    /* opacity: 0; */
+}
+
+.hotkeys .hotkey {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.hotkeys .hotkey .key {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    padding: 0 8px;
+    height: 24px;
+    border-radius: 4px;
+    background-color: #2DFF9B2E;
+    font-family: Barlow;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 14px;
+    letter-spacing: 0px;
+    text-align: left;
+    color: #57FFAF;
+    text-transform: capitalize;
+}
+
+.hotkeys .hotkey .key:has(svg) {
+    padding: 0;
+    background-color: transparent;
+}
+
+.hotkeys .hotkey .action {
+    font-family: Barlow;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 16px;
+    letter-spacing: 0.5px;
+    text-align: left;
+    color: white;
+    margin: 0;
+    text-transform: capitalize;
+}
+
+
+/*  notification */
+
+
+.notifications {
+    position: absolute;
+    right: 0;
+    top: 0;
+    /* pointer-events: none; */
+    margin: 24px;
+    transform: scale(var(--scale));
+}
+
+.notification {
+    position: relative;
+    display: flex;
+    justify-content: start;
+    align-items: start;
+    gap: 12px;
+    height: fit-content;
+    width: 400px;
+    padding: 16px;
+    padding-right: 48px;
+    background-color: #121212;
+    border-radius: 12px;
+    border-left: 3px solid #30E489;
+    transition: all .3s ease;
+    margin-bottom: 18px;
+}
+
+.notification .icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 36px;
+    width: 36px;
+    background-color: #30E48933;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.notification .content {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: start;
+    gap: 2px;
+}
+
+.notification .content h1 {
+    color: #FFF;
+    font-family: Barlow;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+    text-transform: capitalize;
+}
+
+.notification .content p {
+    color: #8C8C91;
+    font-family: Barlow;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+
+.notification .close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 16px;
+    transition: all .2s ease;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    stroke: #8C8C91;
+}
+
+.notification .close:hover {
+    stroke: #FF6B61;
+}
+
+.notification.success {
+    border-left: 3px solid #30E489 !important;
+}
+
+.notification.warning {
+    border-left: 3px solid #FF6B61 !important;
+}
+
+.notification.info {
+    border-left: 3px solid #60FFED !important;
+}
+
+.notification.success .icon {
+    background-color: #30E48933;
+}
+
+.notification.warning .icon {
+    background-color: #FF6B6133;
+}
+
+.notification.info .icon {
+    background-color: #60FFED33;
+}
+
+
+.notification.entering {
+    transform: translateX(100%);
+    opacity: 0;
+}
+
+.notification.entered {
+    transform: translateX(0%);
+    opacity: 1;
+}
+
+.notification.leaving {
+    transform: translateX(100%);
+    opacity: 0;
+}
