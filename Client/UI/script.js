@@ -3,18 +3,6 @@ const CameraManager = {
     adminPermission: false,
     screen: $(".screen"),
 
-    // Toggle the black screen
-    toggleBlackScreen: function (show) {
-        if (show) {
-            this.screen.css("background-color", "black");
-            this.screen.fadeIn(500);
-        } else {
-            this.screen.css("background-color", "transparent");
-            this.screen.fadeOut(500);
-            console.log("fadein");
-        }
-    },
-
     // Toggle visibility and clear content of the camera monitor.
     toggleCameraMonitor: function (show) {
         const $monitor = $('#camera-monitor');
@@ -182,19 +170,5 @@ Events.Subscribe("AdminPermission", (permission) => {
         CameraManager.adminPermission = permission;
     } catch (err) {
         console.error("Error setting admin permission:", err);
-    }
-});
-Events.Subscribe("AddBlackScreen", () => {
-    try {
-        CameraManager.toggleBlackScreen(true);
-    } catch (err) {
-        console.error("Error adding black screen:", err);
-    }
-});
-Events.Subscribe("RemoveBlackScreen", () => {
-    try {
-        CameraManager.toggleBlackScreen(false);
-    } catch (err) {
-        console.error("Error removing black screen:", err);
     }
 });

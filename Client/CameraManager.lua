@@ -74,15 +74,12 @@ function CameraManager.HandleKeyDown(key_name)
     end
 end
 
+-- Handle KeyDown events
 Input.Subscribe("KeyDown", function(key_name, delta)
     CameraManager.HandleKeyDown(key_name)
-    if key_name == "W" or key_name == "A" or key_name == "S" or key_name == "D" then
-        if CameraManager.cinematic_mode then
-            return false
-        end
-    end
 end)
 
+-- Handle KeyUp events & Execute actions for Q and E keys
 Input.Subscribe("KeyUp", function(key_name, delta)
     if key_name == "Q" and CameraManager.freecam_mode then
         Input.InputKey("LeftControl", 1)
@@ -111,19 +108,19 @@ function CameraManager.ToggleFreeCamMode()
                 Events.CallRemote("ToggleNoClip", true, true)
                 CameraManager.freecam_mode = true
                 CameraManager.UpdateHotkeys({
-                    { key = "F", actionName = "Toggle FreeCam Mode" },
-                    { key = "Q", actionName = "Move Down" },
-                    { key = "E", actionName = "Move UP" },
-                    { key = "H", actionName = "Create Camera" },
-                    { key = "U", actionName = "Toggle UI" },
+                    { key = "F",             actionName = "Toggle FreeCam Mode" },
+                    { key = "Q",             actionName = "Move Down" },
+                    { key = "E",             actionName = "Move UP" },
+                    { key = "H",             actionName = "Create Camera" },
+                    { key = "U",             actionName = "Toggle UI" },
                     { key = "MouseScrollUp", actionName = "Zoom" },
                 })
             else
                 Events.CallRemote("ToggleNoClip", true, true)
                 CameraManager.freecam_mode = true
                 CameraManager.UpdateHotkeys({
-                    { key = "F", actionName = "Toggle FreeCam Mode" },
-                    { key = "U", actionName = "Toggle UI" },
+                    { key = "F",             actionName = "Toggle FreeCam Mode" },
+                    { key = "U",             actionName = "Toggle UI" },
                     { key = "MouseScrollUp", actionName = "Zoom" },
                 })
             end
@@ -174,17 +171,7 @@ end
 function CameraManager.SwitchCamera(direction)
     if not CameraManager.cinematic_mode or #CameraManager.cameras == 0 then return end
 
-    if Config.UseBlackScreen then
-        CameraManager.web_ui:CallEvent("AddBlackScreen")
-        Timer.SetTimeout(function()
-            CameraManager.SwitchCameraLogic(direction)
-        end, 500)
-        Timer.SetTimeout(function()
-            CameraManager.web_ui:CallEvent("RemoveBlackScreen")
-        end, 1500)
-    else
-        CameraManager.SwitchCameraLogic(direction)
-    end
+    CameraManager.SwitchCameraLogic(direction)
 end
 
 function CameraManager.MoveDown()
@@ -368,20 +355,20 @@ Events.SubscribeRemote("SendNotification", function(type, title, text)
     CameraManager.web_ui:CallEvent("ShowNotification", type, title, text)
 end)
 
--- Handle mouse scroll for FOV adjustment
-Input.Subscribe("MouseScroll", function(mouse_x, mouse_y, delta)
-    if CameraManager.freecam_mode then
-        local clamped_delta = math.max(-1, math.min(1, delta))
-        clamped_delta = -clamped_delta
-        local new_FOV = CameraManager.current_FOV_multiplier + (0.1 * clamped_delta)
-        CameraManager.current_FOV_multiplier = math.max(0.1, math.min(1.3, new_FOV))
+-- Handle mouse scroll for FOV adjustment // REMOVED FOR NOW DUE TO BUGS
+-- Input.Subscribe("MouseScroll", function(mouse_x, mouse_y, delta)
+--     if CameraManager.freecam_mode then
+--         local clamped_delta = math.max(-1, math.min(1, delta))
+--         clamped_delta = -clamped_delta
+--         local new_FOV = CameraManager.current_FOV_multiplier + (0.1 * clamped_delta)
+--         CameraManager.current_FOV_multiplier = math.max(0.1, math.min(1.3, new_FOV))
 
-        local status, err = pcall(Events.CallRemote, "SetFOVMultiplier", CameraManager.current_FOV_multiplier)
-        if not status then
-            print("Error setting FOV multiplier: ", err)
-        end
-    end
-end)
+--         local status, err = pcall(Events.CallRemote, "SetFOVMultiplier", CameraManager.current_FOV_multiplier)
+--         if not status then
+--             print("Error setting FOV multiplier: ", err)
+--         end
+--     end
+-- end)
 
 -- Handle the reception of camera data and UI update
 Events.SubscribeRemote("OpenCameraUI", function(cameras)
