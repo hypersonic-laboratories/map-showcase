@@ -1,46 +1,71 @@
+-- Required modules
 Package.Require("CameraManager.lua")
+Package.Require("Database.lua")
+Package.Require("Admin.lua")
+Package.Require("Callback.lua")
 
 CURRENT_PLAYERS = {}
 
--- Function to spawn a Character to a player
+-- Function to spawn a character for a player
 function SpawnCharacter(player)
-    Console.Log("Spawn player")
-    local new_character = HCharacter(Vector(0, 0, 0), Rotator(0, 0, 0), player)
-    -- Possess the new Character
-    player:Possess(new_character)
+    local new_character = Character(Config.SpawnPoint, Rotator(0, 0, 0), "helix::SK_Male")
 
+    new_character:AddSkeletalMeshAttached('head', "helix::SK_Male_Head")
+    new_character:AddSkeletalMeshAttached('legs', "helix::SK_Delivery_Lower")
+    new_character:AddSkeletalMeshAttached('top', "helix::SK_Delivery_Top")
+    new_character:AddSkeletalMeshAttached('shoes', "helix::SK_Police_Shoes")
+    
+    -- Possess the new character
+    player:Possess(new_character)
+    
     -- Check if the player is already in the list before adding
     if CURRENT_PLAYERS[player:GetAccountID()] then
         CURRENT_PLAYERS[player:GetAccountID()] = nil
     end
 
+    local player_name = player:GetAccountName()
+    local is_dev = false
+
+    -- Check if the player is a developer
+    for _, dev_name in pairs(Config.Devs) do
+        if dev_name == player_name then
+            is_dev = true
+            break
+        end
+    end
+
+    print("Player is dev: " .. tostring(is_dev))
+
     -- Add the player to the list of current players
-    CURRENT_PLAYERS[player:GetAccountID()] = new_character
+    CURRENT_PLAYERS[player:GetAccountID()] = {
+        character = new_character,
+        cinematic_timer = nil,
+        is_dev = is_dev,
+    }
 
     print("New character spawned for player: " .. player:GetName())
+    Events.CallRemote("UpdateCameras", player, CameraManager.cameras)
 end
 
--- Subscribes to an Event which is triggered when Players join the server (i.e. Spawn)
+-- Subscribe to the spawn event for players joining the server
 Player.Subscribe("Spawn", SpawnCharacter)
 
--- Iterates for all already connected players and give them a Character as well
--- This will make sure you also get a Character when you reload the package
+-- Ensure characters are spawned for all connected players when the package is loaded
 Package.Subscribe("Load", function()
-    for k, player in pairs(Player.GetAll()) do
+    for _, player in pairs(Player.GetAll()) do
         SpawnCharacter(player)
     end
 end)
 
--- When Player leaves the server, destroy it's Character
+-- Handle player disconnect
 Player.Subscribe("Destroy", function(player)
     local character = player:GetControlledCharacter()
-    if (character) then
+    if character then
         character:Destroy()
     end
 
-    --Check if the player is in the list before removing
+    -- Check if the player is in the list before removing
     if CURRENT_PLAYERS[player:GetAccountID()] then
-        -- Remove the player from the list of current players
         CURRENT_PLAYERS[player:GetAccountID()] = nil
     end
 end)
