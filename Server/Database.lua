@@ -84,8 +84,6 @@ function CameraManager.loadCamerasFromDatabase()
     else
         print("Failed to load cameras from the database.")
     end
-
-    print(HELIXTable.Dump(CameraManager.cameras))
 end
 
 -- Save a camera to the database
