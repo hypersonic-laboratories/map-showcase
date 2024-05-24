@@ -199,7 +199,8 @@ function CameraManager.watchCamera(player, camera_id)
     CameraManager.toggleNoClip(player, true, false)
     player_character:SetLocation(camera.location)
     player_character:SetRotation(camera.rotation)
-    player_character:SetFOVMultiplier(camera.FOV)
+
+    -- player_character:SetFOVMultiplier(camera.fov)
     player:SetCameraRotation(camera.rotation)
 end
 
