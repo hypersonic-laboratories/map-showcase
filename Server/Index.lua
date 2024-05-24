@@ -17,6 +17,15 @@ function SpawnCharacter(player)
     
     -- Possess the new character
     player:Possess(new_character)
+
+    new_character:Subscribe("Death", function(self, last_damage_taken, last_bone_damaged, damage_type_reason, hit_from_direction, instigator, causer)
+        -- Respawn the player after a delay
+        Timer.SetTimeout(function()
+            if self:IsValid() then
+                self:Respawn()
+            end
+        end, 5000)
+    end)
     
     -- Check if the player is already in the list before adding
     if CURRENT_PLAYERS[player:GetAccountID()] then
