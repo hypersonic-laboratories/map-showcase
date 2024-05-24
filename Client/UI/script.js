@@ -1,19 +1,17 @@
-// Define CameraManager as an object to encapsulate all related methods.
 const CameraManager = {
     adminPermission: false,
     screen: $(".screen"),
 
-    // Toggle visibility and clear content of the camera monitor.
     toggleCameraMonitor: function (show) {
         const $monitor = $('#camera-monitor');
         if (show) {
             $monitor.show();
+            $monitor.css('display', 'grid')
         } else {
             $monitor.hide().empty();
         }
     },
 
-    // Add a camera card to the UI.
     addCamera: function (camera) {
         const $cameraCard = $('<div>', {
             'class': 'camera-card',
@@ -37,41 +35,38 @@ const CameraManager = {
                 <button class="button confirm">Confirm</button>
                 <button class="button cancel">Cancel</button>
             `,
-            css: { display: 'none' }  // Initially hide the overlay
+            css: { display: 'none' }
         }).appendTo($cameraCard);
 
         $cameraCard.append($cameraName, $cameraInfo);
 
-        // Right click event
         $cameraCard.on('contextmenu', (event) => {
-            if (!this.adminPermission) return; // Prevent right click if not an admin
+            if (!this.adminPermission) return;
             event.preventDefault();
             $confirmationOverlay.show();
             $cameraCard.css('background-image', 'url(path/to/black_screen.jpg)');
         });
 
-        // Confirm and Cancel button events
         $confirmationOverlay.find('.confirm').on('click', (event) => {
-            if (!this.adminPermission) return; // Prevent right click if not an admin
+            if (!this.adminPermission) return;
             event.stopPropagation();
             $cameraCard.remove();
             Events.Call("CameraRemoved", camera.id);
         });
 
         $confirmationOverlay.find('.cancel').on('click', (event) => {
-            if (!this.adminPermission) return; // Prevent right click if not an admin
+            if (!this.adminPermission) return;
             event.stopPropagation();
             $confirmationOverlay.hide();
             $cameraCard.css('background-image', `url(${camera.img})`);
         });
 
         $cameraCard.on('click', (event) => {
-            event.stopPropagation(); // Prevents the card's own click handler from firing when the overlay is clicked
+            event.stopPropagation();
             Events.Call("CameraClicked", camera.id);
         });
     },
 
-    // Set up hotkeys in the UI.
     setHotkeys: function (hotkeys) {
         const $hotkeysContainer = $('.hotkeys').empty();
         hotkeys.forEach(hotkey => {
@@ -85,7 +80,6 @@ const CameraManager = {
         });
     },
 
-    // Helper function to format hotkey icons.
     formatHotkeyIcon: function (key) {
         switch (key) {
             case "LeftClick": return '<img src="path/to/leftclick.svg" alt="Left Click">';
@@ -102,7 +96,6 @@ const CameraManager = {
         }
     },
 
-    // Show notifications.
     showNotification: function (type, title, description) {
         console.log(type, title, description);
         const $notification = $(`
@@ -123,7 +116,6 @@ const CameraManager = {
         this.animateNotification($notification);
     },
 
-    // Animate and remove notifications.
     animateNotification: function ($notification) {
         setTimeout(() => { $notification.removeClass('entering').addClass('entered'); }, 100);
         setTimeout(() => { $notification.removeClass('entered').addClass('leaving'); }, 5000);
@@ -136,7 +128,6 @@ const CameraManager = {
     }
 };
 
-// Subscribing to events
 Events.Subscribe("AddCamera", (camera) => {
     try {
         CameraManager.addCamera(camera);
