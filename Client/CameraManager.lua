@@ -48,9 +48,9 @@ end
 -- Handle key down events
 -- @param key_name The name of the key pressed
 function CameraManager.HandleKeyDown(key_name)
-    if not CameraManager.active_hotkeys[key_name] then
-        return
-    end
+    --if not CameraManager.active_hotkeys[key_name] then
+    --    return
+    --end
 
     local actions = {
         F = function() CameraManager.ToggleFreeCamMode() end,
@@ -59,7 +59,10 @@ function CameraManager.HandleKeyDown(key_name)
         G = function() CameraManager.ToggleCameraMenu() end,
         A = function() CameraManager.SwitchCamera(-1) end,
         D = function() CameraManager.SwitchCamera(1) end,
-        E = function() CameraManager.ExitCameraView(false) end,
+        E = function()
+                CameraManager.MoveUp()
+                CameraManager.ExitCameraView(false)
+            end,
         Q = function() CameraManager.MoveDown() end,
         R = function() CameraManager.ExitCameraView(true) end,
         U = function() CameraManager.ToggleAllUI() end,
@@ -81,10 +84,12 @@ end)
 
 -- Handle KeyUp events & Execute actions for Q and E keys
 Input.Subscribe("KeyUp", function(key_name, delta)
-    if key_name == "Q" and CameraManager.freecam_mode then
-        Input.InputKey("LeftControl", 1)
-    elseif key_name == "E" and CameraManager.freecam_mode then
-        Input.InputKey("SpaceBar", 1)
+    if CameraManager.freecam_mode then
+        if key_name == "Q" then
+            Input.InputKey("LeftControl", InputEvent.Released)
+        elseif key_name == "E" then
+            Input.InputKey("SpaceBar", InputEvent.Released)
+        end
     end
 end)
 
@@ -109,19 +114,21 @@ function CameraManager.ToggleFreeCamMode()
                 CameraManager.freecam_mode = true
                 CameraManager.UpdateHotkeys({
                     { key = "F",             actionName = "Toggle FreeCam Mode" },
-                    { key = "Q",             actionName = "Move Down" },
-                    { key = "E",             actionName = "Move UP" },
+                    { key = "Q / Left Control",             actionName = "Move Down" },
+                    { key = "E / Space Bar",             actionName = "Move Up" },
                     { key = "H",             actionName = "Create Camera" },
                     { key = "U",             actionName = "Toggle UI" },
-                    { key = "MouseScrollUp", actionName = "Zoom" },
+                    --{ key = "MouseScrollUp", actionName = "Zoom" },
                 })
             else
                 Events.CallRemote("ToggleNoClip", true, true)
                 CameraManager.freecam_mode = true
                 CameraManager.UpdateHotkeys({
                     { key = "F",             actionName = "Toggle FreeCam Mode" },
+                    { key = "Q / Left Control",             actionName = "Move Down" },
+                    { key = "E / Space Bar",             actionName = "Move Up" },
                     { key = "U",             actionName = "Toggle UI" },
-                    { key = "MouseScrollUp", actionName = "Zoom" },
+                    --{ key = "MouseScrollUp", actionName = "Zoom" },
                 })
             end
         end)
@@ -177,6 +184,11 @@ end
 function CameraManager.MoveDown()
     if not CameraManager.freecam_mode then return end
     Input.InputKey("LeftControl", 0)
+end
+
+function CameraManager.MoveUp()
+    if not CameraManager.freecam_mode then return end
+    Input.InputKey("SpaceBar", 0)
 end
 
 -- Logic to switch camera
