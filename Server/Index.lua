@@ -36,7 +36,7 @@ function SpawnCharacter(player)
     local is_dev = false
 
     -- Check if the player is a developer
-    for _, dev_name in pairs(Config.Devs) do
+    for _, dev_name in pairs(Config.Admins) do
         if dev_name == player_name then
             is_dev = true
             break
