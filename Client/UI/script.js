@@ -128,6 +128,23 @@ const CameraManager = {
     }
 };
 
+
+Events.Subscribe("CopyCoords", function (coords) {
+    if (coords) {
+        var tempTextArea = document.createElement("textarea");
+        tempTextArea.value = coords;
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        try {
+            document.execCommand("copy");
+            CameraManager.showNotification("success", "Coordinates copied to clipboard", coords);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        }
+        document.body.removeChild(tempTextArea);
+    }
+});
+
 Events.Subscribe("AddCamera", (camera) => {
     try {
         CameraManager.addCamera(camera);

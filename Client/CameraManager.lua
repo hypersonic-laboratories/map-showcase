@@ -21,14 +21,16 @@ local CameraManager = {
 function CameraManager.Initialize()
     Input.SetMouseEnabled(false)
     CameraManager.default_hotkeys = Config.EnableFreeCamera and {
-        { key = "F", actionName = "Toggle FreeCam Mode" },
-        { key = "C", actionName = "Enter Cinematic Mode" },
-        { key = "G", actionName = "Toggle Menu" },
-        { key = "U", actionName = "Toggle UI" },
+        { key = "F",  actionName = "Toggle FreeCam Mode" },
+        { key = "C",  actionName = "Enter Cinematic Mode" },
+        { key = "G",  actionName = "Toggle Menu" },
+        { key = "U",  actionName = "Toggle UI" },
+        { key = "F2", actionName = "Copy Coords" }
     } or {
-        { key = "C", actionName = "Enter Cinematic Mode" },
-        { key = "G", actionName = "Toggle Menu" },
-        { key = "U", actionName = "Toggle UI" },
+        { key = "C",  actionName = "Enter Cinematic Mode" },
+        { key = "G",  actionName = "Toggle Menu" },
+        { key = "U",  actionName = "Toggle UI" },
+        { key = "F2", actionName = "Copy Coords" }
     }
     CameraManager.UpdateHotkeys()
 end
@@ -60,13 +62,14 @@ function CameraManager.HandleKeyDown(key_name)
         A = function() CameraManager.SwitchCamera(-1) end,
         D = function() CameraManager.SwitchCamera(1) end,
         E = function()
-                CameraManager.MoveUp()
-                CameraManager.ExitCameraView(false)
-            end,
+            CameraManager.MoveUp()
+            CameraManager.ExitCameraView(false)
+        end,
         Q = function() CameraManager.MoveDown() end,
         R = function() CameraManager.ExitCameraView(true) end,
         U = function() CameraManager.ToggleAllUI() end,
         SHIFT = function() CameraManager.SetSpeedMultiplier(5) end,
+        F2 = function() CameraManager.CopyCoords() end
     }
 
     if actions[key_name] then
@@ -113,22 +116,26 @@ function CameraManager.ToggleFreeCamMode()
                 Events.CallRemote("ToggleNoClip", true, true)
                 CameraManager.freecam_mode = true
                 CameraManager.UpdateHotkeys({
-                    { key = "F",             actionName = "Toggle FreeCam Mode" },
-                    { key = "Q / Left Control",             actionName = "Move Down" },
-                    { key = "E / Space Bar",             actionName = "Move Up" },
-                    { key = "H",             actionName = "Create Camera" },
-                    { key = "U",             actionName = "Toggle UI" },
+                    { key = "F",                actionName = "Toggle FreeCam Mode" },
+                    { key = "Q / Left Control", actionName = "Move Down" },
+                    { key = "E / Space Bar",    actionName = "Move Up" },
+                    { key = "H",                actionName = "Create Camera" },
+                    { key = "U",                actionName = "Toggle UI" },
                     --{ key = "MouseScrollUp", actionName = "Zoom" },
+                    { key = "F2",               actionName = "Copy Coords" }
+
                 })
             else
                 Events.CallRemote("ToggleNoClip", true, true)
                 CameraManager.freecam_mode = true
                 CameraManager.UpdateHotkeys({
-                    { key = "F",             actionName = "Toggle FreeCam Mode" },
-                    { key = "Q / Left Control",             actionName = "Move Down" },
-                    { key = "E / Space Bar",             actionName = "Move Up" },
-                    { key = "U",             actionName = "Toggle UI" },
+                    { key = "F",                actionName = "Toggle FreeCam Mode" },
+                    { key = "Q / Left Control", actionName = "Move Down" },
+                    { key = "E / Space Bar",    actionName = "Move Up" },
+                    { key = "U",                actionName = "Toggle UI" },
                     --{ key = "MouseScrollUp", actionName = "Zoom" },
+                    { key = "F2",               actionName = "Copy Coords" }
+
                 })
             end
         end)
@@ -137,6 +144,14 @@ function CameraManager.ToggleFreeCamMode()
             CameraManager.CloseUI()
         end
     end
+end
+
+function CameraManager.CopyCoords()
+    local player = Client.GetLocalPlayer()
+    local player_location = player:GetCameraLocation()
+    -- break down the vector into string
+    local coords = "Vector(" .. player_location.X .. ", " .. player_location.Y .. ", " .. player_location.Z .. ")"
+    CameraManager.web_ui:CallEvent("CopyCoords", coords)
 end
 
 -- Toggle UI visibility
@@ -240,11 +255,13 @@ CameraManager.web_ui:Subscribe("CameraClicked", function(camera)
     CameraManager.freecam_mode = false
     CameraManager.ui_mode = true
     CameraManager.UpdateHotkeys({
-        { key = "A", actionName = "Previous Camera" },
-        { key = "D", actionName = "Next Camera" },
-        { key = "U", actionName = "Toggle UI" },
-        { key = "E", actionName = "Spawn Here" },
-        { key = "R", actionName = "Go Back" },
+        { key = "A",  actionName = "Previous Camera" },
+        { key = "D",  actionName = "Next Camera" },
+        { key = "U",  actionName = "Toggle UI" },
+        { key = "E",  actionName = "Spawn Here" },
+        { key = "R",  actionName = "Go Back" },
+        { key = "F2", actionName = "Copy Coords" }
+
     })
 
     local status, err = pcall(Events.CallRemote, "WatchCamera", camera)
