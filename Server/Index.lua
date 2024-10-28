@@ -8,25 +8,30 @@ CURRENT_PLAYERS = {}
 
 -- Function to spawn a character for a player
 function SpawnCharacter(player)
-    local new_character = Character(Config.SpawnPoint, Rotator(0, 0, 0), "helix::SK_Male")
+    local new_character = HCharacter(Config.SpawnPoint, Rotator(0, 0, 0), player)
 
-    new_character:AddSkeletalMeshAttached('head', "helix::SK_Male_Head")
-    new_character:AddSkeletalMeshAttached('legs', "helix::SK_Delivery_Lower")
-    new_character:AddSkeletalMeshAttached('top', "helix::SK_Delivery_Top")
-    new_character:AddSkeletalMeshAttached('shoes', "helix::SK_Police_Shoes")
-    
+    new_character:AddSkeletalMeshAttached("legs", "helix::SK_Delivery_Lower")
+    new_character:AddSkeletalMeshAttached("top", "helix::SK_Delivery_Top")
+    new_character:AddSkeletalMeshAttached("shoes", "helix::SK_Police_Shoes")
+
     -- Possess the new character
     player:Possess(new_character)
 
-    new_character:Subscribe("Death", function(self, last_damage_taken, last_bone_damaged, damage_type_reason, hit_from_direction, instigator, causer)
-        -- Respawn the player after a delay
-        Timer.SetTimeout(function()
-            if self:IsValid() then
-                self:Respawn()
-            end
-        end, 5000)
-    end)
-    
+    new_character:Subscribe(
+        "Death",
+        function(self, last_damage_taken, last_bone_damaged, damage_type_reason, hit_from_direction, instigator, causer)
+            -- Respawn the player after a delay
+            Timer.SetTimeout(
+                function()
+                    if self:IsValid() then
+                        self:Respawn()
+                    end
+                end,
+                5000
+            )
+        end
+    )
+
     -- Check if the player is already in the list before adding
     if CURRENT_PLAYERS[player:GetAccountID()] then
         CURRENT_PLAYERS[player:GetAccountID()] = nil
@@ -49,7 +54,7 @@ function SpawnCharacter(player)
     CURRENT_PLAYERS[player:GetAccountID()] = {
         character = new_character,
         cinematic_timer = nil,
-        is_dev = is_dev,
+        is_dev = is_dev
     }
 
     print("New character spawned for player: " .. player:GetName())
@@ -60,21 +65,27 @@ end
 Player.Subscribe("Spawn", SpawnCharacter)
 
 -- Ensure characters are spawned for all connected players when the package is loaded
-Package.Subscribe("Load", function()
-    for _, player in pairs(Player.GetAll()) do
-        SpawnCharacter(player)
+Package.Subscribe(
+    "Load",
+    function()
+        for _, player in pairs(Player.GetAll()) do
+            SpawnCharacter(player)
+        end
     end
-end)
+)
 
 -- Handle player disconnect
-Player.Subscribe("Destroy", function(player)
-    local character = player:GetControlledCharacter()
-    if character then
-        character:Destroy()
-    end
+Player.Subscribe(
+    "Destroy",
+    function(player)
+        local character = player:GetControlledCharacter()
+        if character then
+            character:Destroy()
+        end
 
-    -- Check if the player is in the list before removing
-    if CURRENT_PLAYERS[player:GetAccountID()] then
-        CURRENT_PLAYERS[player:GetAccountID()] = nil
+        -- Check if the player is in the list before removing
+        if CURRENT_PLAYERS[player:GetAccountID()] then
+            CURRENT_PLAYERS[player:GetAccountID()] = nil
+        end
     end
-end)
+)
