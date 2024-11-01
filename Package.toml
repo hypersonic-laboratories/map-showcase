@@ -34,4 +34,4 @@
 # those settings can be configured through new game menu, Config.toml and server command line
 # and can be accessed through Server.GetCustomSettings() method from any package
 [custom_settings]
-    # my_toggle_example = { label = "awesome toggle", type = "boolean", description = "press this!", default = true }
+    spawn_point = { label = "Spawn Point", type = "text", description = "Spawn point for the players", default = "Vector(10832.3, 5051.3, -508.9)" }

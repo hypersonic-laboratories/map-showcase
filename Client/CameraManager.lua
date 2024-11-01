@@ -107,7 +107,9 @@ function CameraManager.ToggleFreeCamMode()
     if CameraManager.freecam_mode then
         Events.CallRemote("LeavePlacingCameraMode")
         Events.CallRemote("ToggleNoClip", false, false)
-        Input.SetInputEnabled(true)
+        -- Input.SetInputEnabled(true)
+        Input.SetMouseEnabled(false)
+        Events.CallRemote("ToggleCharInput", true)
         CameraManager.freecam_mode = false
         CameraManager.UpdateHotkeys()
     else
@@ -168,12 +170,14 @@ function CameraManager.CreateCamera()
             local player_location = player:GetCameraLocation()
             local player_rotation = player:GetCameraRotation()
             Events.CallRemote("CreateCamera", player_location, player_rotation, CameraManager.current_FOV_multiplier)
-            PostProcess.SetExposure(5)
+            -- PostProcess.SetExposure(5)
             CameraManager.DisableInput()
             CameraManager.taking_screenshot = true
             Timer.SetTimeout(function()
-                PostProcess.SetExposure(0)
-                Input.SetInputEnabled(true)
+                -- PostProcess.SetExposure(0)
+                -- Input.SetInputEnabled(true)
+                Input.SetMouseEnabled(false)
+                Events.CallRemote("ToggleCharInput", true)
             end, 3500)
         end
     end)
@@ -286,7 +290,9 @@ end)
 -- Disable input for a short period
 function CameraManager.DisableInput()
     Timer.SetTimeout(function()
-        Input.SetInputEnabled(false)
+        -- Input.SetInputEnabled(false)
+        Input.SetMouseEnabled(true)
+        Events.CallRemote("ToggleCharInput", false)
     end, 40)
 end
 
@@ -337,7 +343,9 @@ function CameraManager.ToggleCinematicMode(relocate)
         if not status then
             print("Error stopping watching cameras: ", err)
         end
-        Input.SetInputEnabled(true)
+        -- Input.SetInputEnabled(true)
+        Input.SetMouseEnabled(false)
+        Events.CallRemote("ToggleCharInput", true)
         CameraManager.UpdateHotkeys()
     else
         CameraManager.cinematic_mode = true
