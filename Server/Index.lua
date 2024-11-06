@@ -34,10 +34,6 @@ function SpawnCharacter(player, location)
     print(location)
 	local new_character = HCharacter(location, Rotator(0, 0, 0), player)
 
-	new_character:AddSkeletalMeshAttached("legs", "helix::SK_Delivery_Lower")
-	new_character:AddSkeletalMeshAttached("top", "helix::SK_Delivery_Top")
-	new_character:AddSkeletalMeshAttached("shoes", "helix::SK_Police_Shoes")
-
 	-- Possess the new character
 	player:Possess(new_character)
 
@@ -106,13 +102,6 @@ Package.Subscribe("Load", function()
 	local spawnPoint = customSettings.spawn_point or Config.SpawnPoint
 	SpawnCharacter(player, spawnPoint)
 	end
-end)
-
-Events.SubscribeRemote("ToggleCharInput", function(player, state)
-    local character = player:GetControlledCharacter()
-    if character then
-        character:SetInputEnabled(state)
-    end
 end)
 
 -- Handle player disconnect

@@ -103,19 +103,18 @@ function CameraManager.ToggleFreeCamMode()
     if not Config.EnableFreeCamera then
         return
     end
+    local player = Client.GetLocalPlayer()
+    local player_location = player:GetCameraLocation()
 
     if CameraManager.freecam_mode then
-        Events.CallRemote("LeavePlacingCameraMode")
-        Events.CallRemote("ToggleNoClip", false, false)
-        -- Input.SetInputEnabled(true)
-        Input.SetMouseEnabled(false)
-        Events.CallRemote("ToggleCharInput", true)
+        Events.CallRemote("ToggleNoClip", false, false, player_location)
+        Input.SetInputEnabled(true)
         CameraManager.freecam_mode = false
         CameraManager.UpdateHotkeys()
     else
         TriggerCallback('player:IsAdmin', function(is_admin)
             if is_admin then
-                Events.CallRemote("ToggleNoClip", true, true)
+                Events.CallRemote("ToggleNoClip", true, true, player_location)
                 CameraManager.freecam_mode = true
                 CameraManager.UpdateHotkeys({
                     { key = "F",                actionName = "Toggle FreeCam Mode" },
@@ -128,7 +127,7 @@ function CameraManager.ToggleFreeCamMode()
 
                 })
             else
-                Events.CallRemote("ToggleNoClip", true, true)
+                Events.CallRemote("ToggleNoClip", true, true, player_location)
                 CameraManager.freecam_mode = true
                 CameraManager.UpdateHotkeys({
                     { key = "F",                actionName = "Toggle FreeCam Mode" },
@@ -147,6 +146,12 @@ function CameraManager.ToggleFreeCamMode()
         end
     end
 end
+
+Events.SubscribeRemote("ForceNoclip", function(state, relocate)
+    local player = Client.GetLocalPlayer()
+    local player_location = player:GetCameraLocation()
+    Events.CallRemote("ToggleNoClip", state, relocate, player_location)
+end)
 
 function CameraManager.CopyCoords()
     local player = Client.GetLocalPlayer()
@@ -175,9 +180,7 @@ function CameraManager.CreateCamera()
             CameraManager.taking_screenshot = true
             Timer.SetTimeout(function()
                 -- PostProcess.SetExposure(0)
-                -- Input.SetInputEnabled(true)
-                Input.SetMouseEnabled(false)
-                Events.CallRemote("ToggleCharInput", true)
+                Input.SetInputEnabled(true)
             end, 3500)
         end
     end)
@@ -268,7 +271,11 @@ CameraManager.web_ui:Subscribe("CameraClicked", function(camera)
 
     })
 
-    local status, err = pcall(Events.CallRemote, "WatchCamera", camera)
+    local player = Client.GetLocalPlayer()
+    local player_location = player:GetCameraLocation()
+    local player_rotation = player:GetCameraRotation()
+
+    local status, err = pcall(Events.CallRemote, "WatchCamera", camera, player_location, player_rotation)
     if not status then
         print("Error watching camera: ", err)
     end
@@ -287,12 +294,13 @@ CameraManager.web_ui:Subscribe("CameraRemoved", function(camera_id)
     end
 end)
 
+Input.SetInputEnabled(false)
+
 -- Disable input for a short period
 function CameraManager.DisableInput()
     Timer.SetTimeout(function()
-        -- Input.SetInputEnabled(false)
-        Input.SetMouseEnabled(true)
-        Events.CallRemote("ToggleCharInput", false)
+        Input.SetInputEnabled(false)
+        print(Input.IsInputEnabled())
     end, 40)
 end
 
@@ -343,9 +351,7 @@ function CameraManager.ToggleCinematicMode(relocate)
         if not status then
             print("Error stopping watching cameras: ", err)
         end
-        -- Input.SetInputEnabled(true)
-        Input.SetMouseEnabled(false)
-        Events.CallRemote("ToggleCharInput", true)
+        Input.SetInputEnabled(true)
         CameraManager.UpdateHotkeys()
     else
         CameraManager.cinematic_mode = true
@@ -361,8 +367,12 @@ function CameraManager.ToggleCinematicMode(relocate)
             CameraManager.CloseUI()
         end
 
+        local player = Client.GetLocalPlayer()
+        local player_location = player:GetCameraLocation()
+        local player_rotation = player:GetCameraRotation()
+
         local first_camera = CameraManager.cameras[1].id
-        local status, err = pcall(Events.CallRemote, "WatchCamera", first_camera)
+        local status, err = pcall(Events.CallRemote, "WatchCamera", first_camera, player_location, player_rotation)
         if not status then
             print("Error watching camera: ", err)
         end

@@ -42,8 +42,8 @@ function CameraManager.subscribeEvents()
             print("Error getting all cameras: ", err)
         end
     end)
-    Events.SubscribeRemote("WatchCamera", function(player, camera_id)
-        local status, err = pcall(CameraManager.watchCamera, player, camera_id)
+    Events.SubscribeRemote("WatchCamera", function(player, camera_id, character_location, character_rotation)
+        local status, err = pcall(CameraManager.watchCamera, player, camera_id, character_location, character_rotation)
         if not status then
             print("Error watching camera: ", err)
         end
@@ -84,8 +84,8 @@ function CameraManager.subscribeEvents()
             print("Error relocating player: ", err)
         end
     end)
-    Events.SubscribeRemote("ToggleNoClip", function(player, state, relocate)
-        local status, err = pcall(CameraManager.toggleNoClip, player, state, relocate)
+    Events.SubscribeRemote("ToggleNoClip", function(player, state, relocate, relocate_location)
+        local status, err = pcall(CameraManager.toggleNoClip, player, state, relocate, relocate_location)
         if not status then
             print("Error toggling noclip: ", err)
         end
@@ -173,14 +173,14 @@ end
 -- Start watching cameras for a player with a specific camera ID
 -- @param player The player starting to watch the camera
 -- @param camera_id The ID of the camera to watch
-function CameraManager.watchCamera(player, camera_id)
+function CameraManager.watchCamera(player, camera_id, character_location, character_rotation)
     assert(player, "Player is required")
     assert(camera_id, "Camera ID is required")
     local camera = CameraManager.getCamera(camera_id)
     assert(camera, "Camera not found")
 
-    local player_character = CURRENT_PLAYERS[player:GetAccountID()].character
-    assert(player_character, "Player character not found")
+    -- local player_character = player:GetControlledCharacter()
+    -- assert(player_character, "Player character not found")
 
     if type(camera.location) == "string" then
         camera.location = CameraManager.parseLocation(camera.location)
@@ -189,16 +189,16 @@ function CameraManager.watchCamera(player, camera_id)
         camera.rotation = CameraManager.parseRotation(camera.rotation)
     end
 
-    local character_location = player_character:GetLocation()
-    local character_rotation = player_character:GetRotation()
+    -- local character_location = player_character:GetLocation()
+    -- local character_rotation = player_character:GetRotation()
 
     if not CURRENT_PLAYERS[player:GetAccountID()].is_noclipping then
         CURRENT_PLAYERS[player:GetAccountID()].last_location = character_location
         CURRENT_PLAYERS[player:GetAccountID()].last_rotation = character_rotation
     end
     CameraManager.toggleNoClip(player, true, false)
-    player_character:SetLocation(camera.location)
-    player_character:SetRotation(camera.rotation)
+    player:SetCameraLocation(camera.location)
+    player:SetCameraRotation(camera.rotation)
 
     -- player_character:SetFOVMultiplier(camera.fov)
     player:SetCameraRotation(camera.rotation)
@@ -216,10 +216,7 @@ function CameraManager.stopWatchingCameras(player, relocate)
         Timer.ClearInterval(timer)
         timer = nil
     end
-    local status, err = pcall(CameraManager.toggleNoClip, player, false, relocate)
-    if not status then
-        print("Error toggling noclip: ", err)
-    end
+    Events.CallRemote("ForceNoclip", player, false, relocate)
 end
 
 -- Save a camera image for a player with a specific screeny and camera ID
@@ -255,36 +252,39 @@ end
 -- @param player The player toggling noclip mode
 -- @param state The desired noclip state
 -- @param relocate Whether to relocate the player after toggling noclip
-function CameraManager.toggleNoClip(player, state, relocate)
+-- @param relocate_location The location to relocate the player to
+function CameraManager.toggleNoClip(player, state, relocate, relocate_location)
     assert(player, "Player is required")
     assert(state ~= nil, "State is required")
-
     local character = player:GetControlledCharacter()
     if CURRENT_PLAYERS[player:GetAccountID()].is_noclipping == state then return end
-
     CURRENT_PLAYERS[player:GetAccountID()].is_noclipping = state
 
-    if not character then return end
-
     if not state then
-        character:SetFlyingMode(false)
-        character:SetCollision(CollisionType.Normal)
-        character:SetVisibility(true)
-        if relocate then
-            character:SetLocation(CURRENT_PLAYERS[player:GetAccountID()].last_location)
-            character:SetRotation(CURRENT_PLAYERS[player:GetAccountID()].last_rotation)
+        -- character:SetFlyingMode(false)
+        -- character:SetCollision(CollisionType.Normal)
+        -- character:SetVisibility(true)
+        -- local HCharacter = HCharacter(character:Get)
+        if relocate_location then
+            myHCharacter = HCharacter(relocate_location, Rotator(0, 0, 0), player)
+            player:Possess(myHCharacter)
         end
+        -- if relocate then
+        --     character:SetLocation(CURRENT_PLAYERS[player:GetAccountID()].last_location)
+        --     character:SetRotation(CURRENT_PLAYERS[player:GetAccountID()].last_rotation)
+        -- end
         CameraManager.setFOVMultiplier(player, 1)
         CURRENT_PLAYERS[player:GetAccountID()].is_noclipping = false
     else
-        if relocate then
-            CURRENT_PLAYERS[player:GetAccountID()].last_location = character:GetLocation()
-            CURRENT_PLAYERS[player:GetAccountID()].last_rotation = character:GetRotation()
-        end
-        character:SetFlyingMode(true)
-        character:SetCollision(CollisionType.NoCollision)
-        character:SetVisibility(false)
-        CURRENT_PLAYERS[player:GetAccountID()].is_noclipping = true
+        -- if relocate then
+        --     CURRENT_PLAYERS[player:GetAccountID()].last_location = character:GetLocation()
+        --     CURRENT_PLAYERS[player:GetAccountID()].last_rotation = character:GetRotation()
+        -- end
+        character:Destroy()
+        -- character:SetFlyingMode(true)
+        -- character:SetCollision(CollisionType.NoCollision)
+        -- character:SetVisibility(false)
+        -- CURRENT_PLAYERS[player:GetAccountID()].is_noclipping = true
     end
 end
 
